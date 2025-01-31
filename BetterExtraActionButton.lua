@@ -17,25 +17,25 @@ if MSQ then
 end
 
 -- don't manage the frame for me, thanks, and don't adjust other frames to account for it
-ExtraAbilityContainer.ignoreFramePositionManager = true
+ExtraActionBarFrame.ignoreFramePositionManager = true
 for k, v in next, UIPARENT_MANAGED_FRAME_POSITIONS do
-	v.extraAbilityContainer = nil
+	v.extraActionBarFrame = nil
 end
 
 -- decouple from MainMenuBar
-ExtraAbilityContainer:SetParent(UIParent)
-ExtraAbilityContainer.SetParent = function() end -- mine. fuck off.
-ExtraAbilityContainer:SetMovable(true)
-ExtraAbilityContainer:SetUserPlaced(false)
+ExtraActionBarFrame:SetParent(UIParent)
+ExtraActionBarFrame.SetParent = function() end -- mine. fuck off.
+ExtraActionBarFrame:SetMovable(true)
+ExtraActionBarFrame:SetUserPlaced(false)
 
 -- the way i move the frame is pretty backward, yea, i know
-local overlay = CreateFrame("Frame", nil, ExtraAbilityContainer)
+local overlay = CreateFrame("Frame", nil, ExtraActionBarFrame)
 overlay:SetPoint("TOPLEFT", -4, 4)
 overlay:SetPoint("BOTTOMRIGHT", 4, -4)
 overlay:EnableMouse(true)
 overlay:EnableMouseWheel(true)
 
-local frame = ExtraAbilityContainer
+local frame = ExtraActionBarFrame
 local unlocked = nil
 local moving = nil
 
@@ -56,28 +56,17 @@ local function RestorePosition()
 end
 
 local function UpdateArt()
-	local frames = ExtraAbilityContainer.frames
-	if #frames ~= 1 then return end
-	local f = frames[1].frame
+	local artwork = ExtraActionButton1 and ExtraActionButton1.style
+	if artwork then
+		artwork:SetDesaturated(unlocked)
 
-	local artwork
-	if f == ExtraActionBarFrame then
-		artwork = ExtraActionButton1.style
-	elseif f == ZoneAbilityFrame then
-		artwork = ZoneAbilityFrame.Style
-	else
-		-- print("panic!", f:GetName())
-		return
-	end
-
-	artwork:SetDesaturated(unlocked)
-
-	if unlocked then
-		artwork:SetAlpha(0.6)
-	elseif db.hidebg then
-		artwork:SetAlpha(0)
-	else
-		artwork:SetAlpha(1)
+		if unlocked then
+			artwork:SetAlpha(0.6)
+		elseif db.hidebg then
+			artwork:SetAlpha(0)
+		else
+			artwork:SetAlpha(1)
+		end
 	end
 end
 
@@ -169,21 +158,21 @@ end)
 overlay:RegisterEvent("PLAYER_LOGIN")
 overlay:RegisterEvent("ADDON_LOADED")
 
-
-
-ZoneAbilityFrame:HookScript("OnShow", function(self)
-	-- suddenly ZAB, hide the frame
-	local bar = ExtraActionBarFrame
-	if bar:IsShown() and bar.button.icon:GetTexture() == 132311 then
-		bar:Hide()
-		ExtraAbilityContainer:RemoveFrame(bar)
-		OnShow(overlay)
-	end
-end)
+if ZoneAbilityFrame then
+	ZoneAbilityFrame:HookScript("OnShow", function(self)
+		-- suddenly ZAB, hide the frame
+		local bar = ExtraActionBarFrame
+		if bar:IsShown() and bar.button.icon:GetTexture() == 132311 then
+			bar:Hide()
+			--ExtraAbilityContainer:RemoveFrame(bar)
+			OnShow(overlay)
+		end
+	end)
+end
 
 local function ToggleButton()
 	-- don't mess with it if it's active
-	if HasExtraActionBar() or ZoneAbilityFrame:IsShown() or InCombatLockdown() then
+	if HasExtraActionBar() or (ZoneAbilityFrame and ZoneAbilityFrame:IsShown()) or InCombatLockdown() then
 		return
 	end
 
@@ -198,9 +187,9 @@ local function ToggleButton()
 		bar.button.icon:SetTexture(132311) -- ability_seal
 		bar.button.icon:SetVertexColor(1, 1, 1)
 		bar.button.icon:Show()
-		bar.button.NormalTexture:SetVertexColor(1, 1, 1)
+		bar.button.style:SetVertexColor(1, 1, 1)
 		bar.button:Show()
-		ExtraAbilityContainer:AddFrame(bar, 100)
+		--ExtraAbilityContainer:AddFrame(bar, 100)
 		bar.outro:Stop()
 		bar.intro:Play()
 	end
