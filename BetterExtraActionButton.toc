@@ -1,0 +1,9 @@
+## Interface: 90002
+## Title: BetterExtraActionButton
+## Notes: Fancy up the ExtraActionButton frame
+## Author: Neb
+## Version: 2.0.2
+## OptionalDeps: Masque
+## SavedVariables: BetterExtraActionBarDB
+
+BetterExtraActionButton.lua
